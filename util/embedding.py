@@ -4,14 +4,14 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 
 
-# def create_embedding(model_name = "sentence-transformers/all-mpnet-base-v2",
-# model_kwargs = {'device': 'cpu'},
-# encode_kwargs = {'normalize_embeddings': False}):
-#     hf = HuggingFaceEmbeddings(
-#         model_name=model_name,
-#         model_kwargs=model_kwargs,
-#         encode_kwargs=encode_kwargs
-#     )
+def create_embedding(model_name = "sentence-transformers/all-mpnet-base-v2",
+model_kwargs = {'device': 'cpu'},
+encode_kwargs = {'normalize_embeddings': False}):
+    hf = HuggingFaceEmbeddings(
+        model_name=model_name,
+        model_kwargs=model_kwargs,
+        encode_kwargs=encode_kwargs
+    )
 
 # load pdfs from directory as langchain documents
 def load_pdf_docs(pdf_directory_path):

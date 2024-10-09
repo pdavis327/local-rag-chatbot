@@ -15,101 +15,136 @@
 # ---
 
 # %%
-from getpass import getpass
-from datasets import load_dataset
+# from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.document_loaders.pdf import PyPDFDirectoryLoader 
+from langchain_community.embeddings.sentence_transformer import (
+    SentenceTransformerEmbeddings)
 import chromadb
-import faiss
-from sentence_transformers import SentenceTransformer
-import time
-import json
-from langchain_huggingface import HuggingFaceEmbeddings
-from sentence_transformers import SentenceTransformer
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from llama_index.core import SimpleDirectoryReader
-import os
-from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
-from chromadb.utils import embedding_functions
-
 # %reload_ext autoreload
 # %autoreload 2
 from util import chroma
+from util import embedding
 
 
 # %%
 # user params
 pdf_docs = 'assets/library'
-chroma_collection_name= 'disaster_response_collection'
-embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+chroma_collection_name = 'disaster_response_collection_new'
+embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
 # %%
-chroma.load_chunk_embed_pdf(pdf_docs, chroma_collection_name, embedding_model, chunk_size=512, chunk_overlap=30)
-
-
-# %%
-documents = []
-pdf_folder_path = "assets/library"
-for file in os.listdir(pdf_folder_path):
-    if file.endswith('.pdf'):
-        pdf_path = os.path.join(pdf_folder_path, file)
-        loader = PyPDFLoader(pdf_path)
-        documents.extend(loader.load())
+# Load PDFs from directory as type langchain documents
+docs = embedding.load_pdf_docs(pdf_docs)
 
 # %%
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=30)
+# split and chunk the documents to prep for embedding
+chunked = embedding.rec_split_chunk(docs, chunk_size = 512, chunk_overlap = 30)
 
 
 # %%
-chunked_docs = text_splitter.split_documents(documents)
+# create persistent vector db of embeddings in chroma
+test = chroma.upload_to_collection(collection_name=chroma_collection_name, 
+chunked_documents= chunked, 
+embedding_model= embedding_model,
+persist_path = "db")
 
 # %%
-client = chromadb.Client()
+client = chromadb.PersistentClient(path='db') 
 
 # %%
-
-try:
-    collection = client.get_collection(name='disaster_reponse_test')
-except:
-    print('collection doesnt exist, creating collection')
-    collection = client.create_collection('disaster_reponse_test')
+collection = client.get_collection(name=chroma_collection_name)#, embedding_function=embedding_model)
 
 # %%
-default_ef = embedding_functions.DefaultEmbeddingFunction()
+collection.count()
 
 # %%
-vectordb = Chroma.from_documents(
-        documents=chunked_docs,
-        embedding=embedding_model,
-    )
-
-
-# %%
-vectordb.persist()
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-vectordb = Chroma.from_documents(
-    documents=chunked_docs,
-    embedding=hf,
+results = collection.query(
+    query_texts=["What roles do schools play in disaster repsonse?"],
+    n_results=3
 )
-# vectordb.persist()
+
+results
 
 # %%
-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
+query_str = "Explain how the schools operate in disaster situations"
+
+# %%
+# provide additional context
+new_summary_tmpl_str = (
+    "Context information is below.\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Given the context information and not prior knowledge, "
+    "answer the query while providing citations to the documents used.\n"
+    "Query: {query_str}\n"
+    "Answer: "
+)
+
+
+# %%
+def query_rag(query_str, embedding_model):
+  """
+  Query a Retrieval-Augmented Generation (RAG) system using Chroma database and OpenAI.
+  Args:
+    - query_str (str): The text to query the RAG system with.
+  Returns:
+    - formatted_response (str): Formatted response including the generated text and sources.
+    - response_text (str): The generated response text.
+  """
+  # Prepare the database
+  db = Chroma(embedding_model=embedding_model)
+  
+  # Retrieving the context from the DB using similarity search
+  results = db.similarity_search_with_relevance_scores(query_str, k=3)
+
+  # Check if there are any matching results or if the relevance score is too low
+  if len(results) == 0 or results[0][1] < 0.7:
+    print(f"Unable to find matching results.")
+
+  # Combine context from matching documents
+  context_text = "\n\n - -\n\n".join([doc.page_content for doc, _score in results])
+ 
+  # Create prompt template using context and query text
+  prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+  prompt = prompt_template.format(context=context_text, question=query_str)
+  
+  # Initialize OpenAI chat model
+  model = ChatOpenAI()
+
+  # Generate response text based on the prompt
+  response_text = model.predict(prompt)
+ 
+   # Get sources of the matching documents
+  sources = [doc.metadata.get("source", None) for doc, _score in results]
+ 
+  # Format and return response including generated text and sources
+  formatted_response = f"Response: {response_text}\nSources: {sources}"
+  return formatted_response, response_text
+
+
+# %%
+# Let's call our function we have defined
+formatted_response, response_text = query_rag(query_str)
+# and finally, inspect our final response!
+print(response_text)
 
 
 # %%
 
+# %%
 
 # %%
-def query_database(query_text, n_results=10):
-    results = collection.query(query_texts=query_text, n_results=n_results)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+def query_database(query_str, n_results=10):
+    results = collection.query(query_strs=query_str, n_results=n_results)
     return results
 
 # %%

@@ -35,3 +35,13 @@ def upload_to_collection(collection_name, chunked_documents, embedding_model, pe
             embedding=embedding_model
             )
     return vectordb
+
+def get_vector_db(collection_name, embedding_model, persist_path):
+    db = Chroma(
+        collection_name=collection_name,
+        persist_directory=persist_path,
+        embedding_function=embedding_model
+    )
+
+    return db
+

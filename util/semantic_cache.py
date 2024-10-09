@@ -4,6 +4,17 @@ import time
 import json
 
 def init_cache():
+    '''
+    Initializes the semantic cache.
+    It employs the FlatLS index, which might not be the fastest 
+    but is ideal for small datasets.
+    Depending on the characteristics of the data intended 
+    for the cache and the expected dataset size, another index 
+    such as HNSW or IVF could be utilized.
+    
+    Args:
+    Returns:
+    '''
     index = faiss.IndexFlatL2(768)
     if index.is_trained:
         print("Index trained")
@@ -14,6 +25,10 @@ def init_cache():
     return index, encoder
 
 def retrieve_cache(json_file):
+    '''
+    In the retrieve_cache function, the .json file is retrieved from disk 
+    in case there is a need to reuse the cache across sessions.
+    '''
     try:
         with open(json_file, "r") as file:
             cache = json.load(file)
@@ -24,6 +39,9 @@ def retrieve_cache(json_file):
 
 
 def store_cache(json_file, cache):
+    '''
+    The store_cache function saves the file containing the cache data to disk.
+    '''
     with open(json_file, "w") as file:
         json.dump(cache, file)
 
