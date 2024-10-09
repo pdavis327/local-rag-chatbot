@@ -1,5 +1,5 @@
 import chromadb
-from langchain.vectorstores import Chroma
+from langchain.vectorstores.chroma import Chroma
 import os
 
 def chroma_unique_id(data):
@@ -12,18 +12,26 @@ def query_database(collection, query_text, n_results=5):
     results = collection.query(query_texts=query_text, n_results=n_results)
     return results
 
-def upload_to_collection(collection_name, chunked_documents, embedding_model):
-    client = chromadb.Client()
-    try:
-        collection = client.get_collection(name=collection_name)
-    except:
-        print(f'collection doesnt exist, creating collection: {collection_name}')
-        collection = client.create_collection(collection_name)
-
-    vectordb = Chroma.from_documents(
-        documents=chunked_documents,
-        embedding=embedding_model
-
-
-    )
+def upload_to_collection(collection_name, chunked_documents, embedding_model, persist_path = None):
+    # client = chromadb.Client()
+    # try:
+    #     collection = client.get_collection(name=collection_name)
+    #     print(f'collection already exists: {collection_name}')
+    # except:
+    #     print(f'collection doesnt exist, creating collection: {collection_name}')
+    #     collection = client.create_collection(collection_name)
+    if persist_path:
+        vectordb = Chroma.from_documents(
+            collection_name = collection_name,
+            documents=chunked_documents,
+            embedding=embedding_model,
+            persist_directory = persist_path
+            )
+    
+    else:
+        vectordb = Chroma.from_documents(
+            collection_name = collection_name,
+            documents=chunked_documents,
+            embedding=embedding_model
+            )
     return vectordb
