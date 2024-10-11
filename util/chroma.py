@@ -1,6 +1,12 @@
 from langchain_community.vectorstores import Chroma
+from langchain_community.document_loaders import DirectoryLoader
 import os
-from util import embedding
+import embedding
+import argparse
+
+collection_name = os.getenv('CHROMA_COLLECTION_NAME')
+embedding_model = embedding.init_embedding_model()
+persist_directory = os.getenv('CHROMA_PERSIST_PATH')
 
 def chroma_unique_id(data):
     data = data.to_pandas()
@@ -38,22 +44,39 @@ def get_vector_db(collection_name, embedding_model, persist_path):
 
 
 if __name__ == "__main__":
-    # create chroma db of pdf documents
+    # create chroma db of documents
     # user params
-    pdf_docs = ''
-    chroma_persist_path = 'db'
-    chroma_collection_name = 'disaster_response_collection_new'
-    embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    parser = argparse.ArgumentParser(
+                    prog='upload docs to chromadb',
+                    description='Load files in directory to chroma vector db'
+                    )
+    
+    parser.add_argument("directory", type=str, help='location of file directory')
+    args = parser.parse_args()
 
-    # load pdf as langchain docs
-    docs = embedding.load_pdf_docs(pdf_docs)
+    # load docs as langchain docs
+    print('loading docs as langchain documents')
+    loader = DirectoryLoader(args.directory, 
+                             use_multithreading = True, 
+                             show_progress=True) #glob="**/*.md"
+    docs = loader.load()
+    print(f"loaded {len(docs)} docs")
 
     # split and chunk the documents to prep for embedding
-    chunked = embedding.rec_split_chunk(docs, chunk_size = 512, chunk_overlap = 30)
+    print('splitting and chunking documents')
+    chunked = embedding.rec_split_chunk(docs, chunk_size = 500, chunk_overlap = 50)
 
     # create persistent vector db of embeddings in chroma
-    db = upload_to_collection(collection_name=chroma_collection_name, 
-    chunked_documents= chunked, 
-    embedding_model= embedding_model,
-    persist_path = "db")
+    print(f'uploading documents to chroma collection: {collection_name}')
+    batch_size = 41000
+    def batch_process(chunked, batch_size):
+        for i in range(0, len(chunked), batch_size):
+            batch = chunked[i:i+batch_size]
+            print(f"uploading chunked docs batch {i} - {i+batch_size}")
+            upload_to_collection(collection_name = collection_name, 
+                chunked_documents= batch, 
+                embedding_model= embedding_model,
+                persist_path = persist_directory)
+    batch_process(chunked, batch_size)
+    print('complete')
 

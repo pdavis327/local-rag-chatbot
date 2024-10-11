@@ -1,5 +1,5 @@
 # Dockerfile, Image, Container
-FROM python:3.13
+FROM python:3.11.10
 LABEL maintainer="pete.davis@steampunk.com"
 
 ARG COMMIT="unknown"
@@ -20,4 +20,4 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 COPY . .
 
-ENTRYPOINT [ "python", "-u", "main.py" ]
+ENTRYPOINT [ "python", "-u", "app.py" ]

@@ -6,6 +6,11 @@ __pycache__/
 # notebooks
 *ipynb
 
+# data
+assets/
+
+# database
+db/
 # C extensions
 *.so
 

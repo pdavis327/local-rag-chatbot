@@ -1,6 +1,7 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import DirectoryLoader
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -8,15 +9,6 @@ load_dotenv()
 def init_embedding_model():
    embedding = HuggingFaceEmbeddings(model_name=os.getenv('EMBEDDING_MODEL')) 
    return embedding
-
-def create_embedding(model_name = "sentence-transformers/all-mpnet-base-v2",
-model_kwargs = {'device': 'cpu'},
-encode_kwargs = {'normalize_embeddings': False}):
-    hf = HuggingFaceEmbeddings(
-        model_name=model_name,
-        model_kwargs=model_kwargs,
-        encode_kwargs=encode_kwargs
-    )
 
 # load pdfs from directory as langchain documents
 def load_pdf_docs(pdf_directory_path):

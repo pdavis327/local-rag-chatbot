@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama.llms import OllamaLLM
 from operator import itemgetter
 import os 
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 load_dotenv()
 
 
@@ -74,13 +74,13 @@ def query_rag_streamlit(Chroma_collection, llm_model, promp_template):
     - formatted_response (str): Formatted response including the generated text and sources.
     - response_text (str): The generated response text.
   """
-  
-  db = Chroma_collection
-
   def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-  retriever = db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.5, "k": 5})
+  db = Chroma_collection
+
+  retriever = db.as_retriever(search_type="similarity_score_threshold", 
+                              search_kwargs={"score_threshold": 0.5, "k": 5})
 
   context = itemgetter("question") | retriever | format_docs
   first_step = RunnablePassthrough.assign(context=context)
