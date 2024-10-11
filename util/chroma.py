@@ -7,7 +7,6 @@ def chroma_unique_id(data):
     data['unique_id'] = data.index
     print('indexing complete')
 
-
 def query_database(collection, query_text, n_results=5):
     results = collection.query(query_texts=query_text, n_results=n_results)
     return results
