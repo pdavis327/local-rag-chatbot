@@ -1,8 +1,13 @@
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.document_loaders.pdf import PyPDFDirectoryLoader 
+from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
 import os
+load_dotenv()
 
+def init_embedding_model():
+   embedding = HuggingFaceEmbeddings(model_name=os.getenv('EMBEDDING_MODEL')) 
+   return embedding
 
 def create_embedding(model_name = "sentence-transformers/all-mpnet-base-v2",
 model_kwargs = {'device': 'cpu'},

@@ -1,5 +1,4 @@
-import chromadb
-from langchain.vectorstores.chroma import Chroma
+from langchain_community.vectorstores import Chroma
 import os
 from util import embedding
 

@@ -1,6 +1,11 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+from langchain_ollama.llms import OllamaLLM
+
+import os 
+from dotenv import load_dotenv, dotenv_values
+load_dotenv()
 
 
 template = """
@@ -16,6 +21,9 @@ template = """
   Original question: {question}
   """
 
+def init_llm():
+  llm = OllamaLLM(model= os.getenv('LLM'))
+  return llm
 
 def query_rag(Chroma_collection, query_text, llm_model, promp_template):
   """
@@ -45,3 +53,38 @@ def query_rag(Chroma_collection, query_text, llm_model, promp_template):
 
   for chunk in rag_chain.stream(query_text):
       print(chunk, end="", flush=True)
+  
+  return
+
+
+def query_rag_streamlit(Chroma_collection, llm_model, promp_template): #query_text
+  """
+  Query a Retrieval-Augmented Generation (RAG) system using Chroma db.
+  Args:
+    - query_text (str): The text to query the RAG system with.
+    -prompt_template (str): Query prompt template inclding context and question
+  Returns:
+    - formatted_response (str): Formatted response including the generated text and sources.
+    - response_text (str): The generated response text.
+  """
+
+  def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+  
+  db = Chroma_collection
+  # prompt = ChatPromptTemplate.from_template(promp_template)
+  prompt = promp_template
+
+  retriever = db.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.5, "k": 5})
+
+  rag_chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | prompt
+    | llm_model
+    | StrOutputParser()
+  )
+  return rag_chain
+  # return rag_chain.invoke(query_text)
+
+  # for chunk in rag_chain.stream(query_text):
+  #     print(chunk, end="", flush=True)

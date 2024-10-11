@@ -1,53 +1,35 @@
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     custom_cell_magics: kql
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.11.2
-#   kernelspec:
-#     display_name: hflc
-#     language: python
-#     name: python3
-# ---
+from langchain_community.vectorstores import Chroma
+import os 
+from dotenv import load_dotenv
+load_dotenv()
+import argparse
+import warnings
+warnings.filterwarnings('ignore') 
 
-# %%
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.document_loaders.pdf import PyPDFDirectoryLoader 
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama.llms import OllamaLLM
-from langchain_core.prompts import ChatPromptTemplate
-
-from langchain_chroma import Chroma
-import chromadb
 # %reload_ext autoreload
 # %autoreload 2
 from util import chroma
 from util import embedding
 from util import query
 
+parser = argparse.ArgumentParser(
+                    prog='Simple langchian RAG',
+                    description='This RAG LLM uses Ollama, Langchain, and Chromadb')
+parser.add_argument("queryString", type=str, help='Input string to query RAG grounding docs and LLM')
+args = parser.parse_args()
 
-# %%
-# user params
-chroma_persist_path = 'db'
-chroma_collection_name = 'disaster_response_collection_new'
-embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-llm = OllamaLLM(model="llama2")
+collection_name = os.getenv('CHROMA_COLLECTION_NAME')
+embedding_model = embedding.init_embedding_model()
+persist_directory = os.getenv('CHROMA_PERSIST_PATH')
+llm = query.init_llm()
 
-# %%
 # Load data from vector db
 db = Chroma(
-    collection_name=chroma_collection_name,
+    collection_name=collection_name,
     embedding_function=embedding_model,
-    persist_directory = 'db'
+    persist_directory = persist_directory
 )
 
-# %%
-query_str = 'What roles do schools play in emergencies?'
+print(f'\n{args.queryString}\n')
 
-# %%
-query.query_rag(db, query_str, llm, query.template)
+query.query_rag(db, args.queryString, llm, query.template)
