@@ -1,14 +1,19 @@
 version: '3.9'
 services:
-  pipeline:
-    build:
-      context: .
+  ollama-container:
+    image: ollama/ollama:latest  # Use the official Ollama image
+    container_name: ollama-container
+    ports:
+      - "11434:11434"
     volumes:
-      - ".:/opt/code"
+        - ./ollama/ollama:/root/.ollama
+        - ./entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/usr/bin/bash", "/entrypoint.sh"]
 
-  bash:
-    entrypoint: /bin/bash
-    build:
-      context: .
-    volumes:
-      - ".:/opt/code"
+  streamlit-app:
+    build: .
+    container_name: streamlit-app
+    environment:
+      BASE_URL: http://localhost:11434
+    ports:
+      - "8501:8501"

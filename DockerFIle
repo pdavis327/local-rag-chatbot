@@ -2,26 +2,14 @@
 FROM python:3.11.10
 LABEL maintainer="pete.davis@steampunk.com"
 
-ARG COMMIT="unknown"
-ARG REPO="unknown"
-ARG BRANCH="unknown"
-
-LABEL commit_sha=${COMMIT}
-LABEL commit_branch=${BRANCH}
-LABEL commit_repo=${REPO}
-
-ENV COMMIT_SHA=${COMMIT}
-ENV COMMIT_BRANCH=${BRANCH}
-ENV COMMIT_REPO=${REPO}
-
-WORKDIR /opt/code
+WORKDIR /app
 
 COPY requirements.txt ./
+COPY . . 
+
 RUN pip install -r requirements.txt
 
 EXPOSE 8501
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
-ENTRYPOINT ["python", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
 
-# ENTRYPOINT [ "python", "-u", "app.py" ]

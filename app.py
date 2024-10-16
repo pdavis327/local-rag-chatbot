@@ -6,6 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.chat_message_histories import (
     StreamlitChatMessageHistory,)
+from langchain_community.llms import Ollama
 import os
 from operator import itemgetter
 
@@ -16,7 +17,10 @@ from util import query
 chroma_collection_name = os.getenv('CHROMA_COLLECTION_NAME')
 embedding_model = embedding.init_embedding_model()
 chroma_persist_path = os.getenv('CHROMA_PERSIST_PATH')
-llm = query.init_llm()
+# for local runs uncomment
+# llm = query.init_llm()
+# for ollama in docker image
+llm = Ollama(model = 'llama2',base_url="http://ollama-container:11434")
 
 # Load data from vector db
 db = Chroma(
