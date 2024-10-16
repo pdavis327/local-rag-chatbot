@@ -1,12 +1,14 @@
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import DirectoryLoader
 import os
-import embedding
 import argparse
+import embedding
 
 collection_name = os.getenv('CHROMA_COLLECTION_NAME')
 embedding_model = embedding.init_embedding_model()
 persist_directory = os.getenv('CHROMA_PERSIST_PATH')
+chunk_size = os.getenv('CHUNK_SIZE')
+chunk_overlap = os.getenv('OVERLAP')
 
 def chroma_unique_id(data):
     data = data.to_pandas()

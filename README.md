@@ -1,52 +1,56 @@
-# Simple langchain rag app using Ollama and Chroma
+# Simple local RAG chatbot app using Ollama, langchain, and chroma
 
-This is as simple open source rag app. It uses Chroma as the vector db, ollama for the llm. Within the repo there is a chroma vector database with some example documents already embedded and loaded. 
+This is as simple open source local rag app. It uses Chroma as the vector db, and ollama for the llm. Within the repo there is a chroma vector database with some example documents already embedded and loaded. It also includes the ability to embed and store new documents in a new chroma database collection
 
-## Description
-
-I built this to become more familiar with LLMs and RAG pipelines. I followed a number of tutorials I found online, and relied heavily on the langchain, chroma, and Ollama documentation. 
 
 ## Getting Started
 
-
 ### Dependencies
 
-[Ollama](https://ollama.com/) is required to run this code. 
+Requirements differ depending on whether you plan to run the code in Docker or not. 
 
-Required packages are in requirements.txt
-
-To create a new conda environment:
+1. To create a new conda environment:
 ```
 conda create --name my_project_env
 conda activate my_project_env
 pip install -r requirements.txt
 ```
 
-Pull the desired model, and run ollama
+2. Pull the desired model, and run ollama
 ```
 ollama pull llama2
 ollama serve
 ```
 
+If you plan to run the code in Docker, pulling and serving the model will be taken care of in the build process. 
+
 ### Installing
 
 1. Clone the repo and navigate to the directory
 2. Rename .env.example to .env
-3. Assing the variable names. For instance:
+3. Specify the environmeental paramaters. 
+
+
+## Executing program
+
+### Creating a chroma db and embedding documents
+
+`util/chroma.py` takes one argument `directory` which is the filepath to the documents you wish to embed and store. 
+
+You can run the code using the following: 
 
 ```
-CHROMA_PERSIST_PATH = 'db'
-CHROMA_COLLECTION_NAME = 'disaster_response_collection_new'
-LLM = 'llama2'
-EMBEDDING_MODEL = 'all-MiniLM-L6-v2'
+python chroma.py rag_exploration/assets/library
 ```
 
-### Executing program
+The results will be stored using your .env variables in a new chroma db `CHROMA_COLLECTION_NAME` in `CHROMA_PERSIST_PATH`
 
-test.py can be run from the cmd line for testing. It doesn't retain any history to the chat. In order to run it, just supply a query. 
+### Running the chatbot
+
+`test.py` can be run from the cmd line for testing. It doesn't retain any history to the chat. In order to run it, just supply a query. 
 
 ```
-python test.py 'What role do schools play in natural disaster response?'
+python test.py 'what role do schools play in disaster response?'
 ```
 
 To run the app
@@ -54,12 +58,7 @@ To run the app
 streamlit run app.py
 ```
 
-to run in docker:
-
+To run the app in docker:
 ```
-docker run -p 8501:8501 streamlit
-
-You can now view your Streamlit app in your browser.
-
-URL: http://0.0.0.0:8501
+docker-compose up
 ```

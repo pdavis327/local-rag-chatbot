@@ -6,6 +6,9 @@ __pycache__/
 # notebooks
 *ipynb
 
+# docker ollama files
+ollama/
+
 # data
 assets/
 
