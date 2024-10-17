@@ -1,6 +1,6 @@
 # Local RAG Chatbot App
 
-This is a simple open-source local RAG (Retrieval-Augmented Generation) chatbot application. It utilizes LangChain, Chroma for the vector database, and Ollama for the LLM (Large Language Model). The repository includes a pre-loaded Chroma vector database with example documents and functionality to embed and store documents in a new Chroma database collection.
+This is a simple open-source local RAG (Retrieval-Augmented Generation) chatbot application. It utilizes LangChain, Chroma for the vector database, and Ollama for the LLM (Large Language Model). The repository includes example PDF documents, and the functionality to embed and store documents in a new Chroma database collection. 
 
 ## Getting Started
 
