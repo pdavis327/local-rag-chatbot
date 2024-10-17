@@ -1,64 +1,99 @@
-# Simple local RAG chatbot app using Ollama, langchain, and chroma
+Here’s a revised version of your README file for clarity and organization:
 
-This is as simple open source local rag app. It uses Chroma as the vector db, and ollama for the llm. Within the repo there is a chroma vector database with some example documents already embedded and loaded. It also includes the ability to embed and store new documents in a new chroma database collection
+---
 
+# Local RAG Chatbot App
+
+This is a simple open-source local RAG (Retrieval-Augmented Generation) chatbot application. It utilizes LangChain, Chroma for the vector database, and Ollama for the LLM (Large Language Model). The repository includes a pre-loaded Chroma vector database with example documents and functionality to embed and store documents in a new Chroma database collection.
 
 ## Getting Started
 
-### Dependencies
+### Prerequisites
 
-Requirements differ depending on whether you plan to run the code in Docker or not. 
+Requirements vary depending on whether you plan to run the code in Docker.
 
-1. To create a new conda environment:
-```
+#### Creating a Conda Environment
+
+To set up a new Conda environment, run the following commands:
+
+```zsh
 conda create --name my_project_env
 conda activate my_project_env
 pip install -r requirements.txt
 ```
 
-2. Pull the desired model, and run ollama
-```
+#### Pulling the Model and Running Ollama
+
+To pull the desired model and start Ollama, use the commands:
+
+```zsh
 ollama pull llama2
 ollama serve
 ```
 
-If you plan to run the code in Docker, pulling and serving the model will be taken care of in the build process. 
+If you choose to run the code in Docker, pulling and serving the model will be handled automatically during the build process.
 
-### Installing
+### Installation
 
-1. Clone the repo and navigate to the directory
-2. Rename .env.example to .env
-3. Specify the environmeental paramaters. 
+1. Clone the repository and navigate to the project directory:
 
+   ```zsh
+   git clone <repository-url>
+   cd <repository-name>
+   ```
 
-## Executing program
+2. Rename the example environment file:
 
-### Creating a chroma db and embedding documents
+   ```zsh
+   mv .env.example .env
+   ```
 
-`util/chroma.py` takes one argument `directory` which is the filepath to the documents you wish to embed and store. 
+3. Specify the environment parameters in the `.env` file.
 
-You can run the code using the following: 
+## Executing the Program
 
+### Creating a Chroma Database and Embedding Documents
+
+You can create a Chroma database and embed documents using `util/chroma.py`. It requires one argument: the filepath to the documents you wish to embed and store.
+
+Run the following command:
+
+```zsh
+python util/chroma.py rag_exploration/assets/library
 ```
-python chroma.py rag_exploration/assets/library
+
+The results will be stored using your environment variables in a new Chroma database defined by `CHROMA_COLLECTION_NAME` and `CHROMA_PERSIST_PATH`.
+
+### Running the Chatbot
+
+To test the chatbot, run `test.py` from the command line. Note that it does not retain chat history. Simply supply a query:
+
+```zsh
+python test.py 'What role do schools play in disaster response?'
 ```
 
-The results will be stored using your .env variables in a new chroma db `CHROMA_COLLECTION_NAME` in `CHROMA_PERSIST_PATH`
+### Running the Application
 
-### Running the chatbot
+To run the app locally, use:
 
-`test.py` can be run from the cmd line for testing. It doesn't retain any history to the chat. In order to run it, just supply a query. 
-
-```
-python test.py 'what role do schools play in disaster response?'
-```
-
-To run the app
-```
+```zsh
 streamlit run app.py
 ```
 
-To run the app in docker:
-```
+#### Running the App in Docker
+
+If you prefer to run the app in Docker, use the following command:
+
+```zsh
 docker-compose up
 ```
+
+You should be able to view the app in your browser at the following URL:
+
+```
+http://0.0.0.0:8501
+```
+
+---
+
+Feel free to let me know if you’d like any more changes or additional sections!
