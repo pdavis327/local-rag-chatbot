@@ -10,8 +10,6 @@ This is a simple open-source local RAG (Retrieval-Augmented Generation) chatbot 
 
 ### Prerequisites
 
-Requirements vary depending on whether you plan to run the code in Docker.
-
 #### Creating a Conda Environment
 
 To set up a new Conda environment, run the following commands:
@@ -42,11 +40,7 @@ If you choose to run the code in Docker, pulling and serving the model will be h
    cd <repository-name>
    ```
 
-2. Rename the example environment file:
-
-   ```zsh
-   mv .env.example .env
-   ```
+2. Rename `.env.example` to  `.env`
 
 3. Specify the environment parameters in the `.env` file.
 
@@ -59,7 +53,7 @@ You can create a Chroma database and embed documents using `util/chroma.py`. It 
 Run the following command:
 
 ```zsh
-python util/chroma.py rag_exploration/assets/library
+python util/chroma.py local_rag_chatbot/assets/library
 ```
 
 The results will be stored using your environment variables in a new Chroma database defined by `CHROMA_COLLECTION_NAME` and `CHROMA_PERSIST_PATH`.
@@ -93,7 +87,3 @@ You should be able to view the app in your browser at the following URL:
 ```
 http://0.0.0.0:8501
 ```
-
----
-
-Feel free to let me know if you’d like any more changes or additional sections!
